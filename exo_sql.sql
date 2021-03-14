@@ -64,15 +64,50 @@ GROUP BY ville_departement, departement_nom
 ORDER BY `nbr_items` DESC
 
 -- 6  Obtenir la liste des 10 plus grands départements, en terme de superficie
+SELECT d.departement_nom, v.ville_departement, SUM(v.ville_surface) AS surface 
+FROM villes_france_free v, departement d 
+WHERE d.departement_code = v.ville_departement
+GROUP BY v.ville_departement, departement_nom
+ORDER BY surface  DESC
+LIMIT 10
+-- résultat trop long
 
 -- 7  Compter le nombre de villes dont le nom commence par “Saint”
+SELECT COUNT(*) AS villeNomSaint
+FROM villes_france_free v
+WHERE v.ville_nom LIKE 'Saint%'
+-- résultat :
+-- villeNomSaint 
+-- 4260
 
 -- 8  Obtenir la liste des villes qui ont un nom existants plusieurs fois, 
 -- et trier afin d’obtenir en premier celles dont le nom est le plus souvent utilisé par plusieurs communes
+SELECT v.ville_nom, COUNT(*) AS nb
+FROM villes_france_free v
+GROUP BY v.ville_nom
+ORDER BY nb DESC
 
 -- 9  Obtenir en une seule requête SQL la liste des villes dont la superficie est supérieur à la superficie moyenne
+SELECT ville_nom
+FROM villes_france_free
+WHERE ville_surface > (SELECT AVG(ville_surface) FROM villes_france_free)
 
 -- 10  Obtenir la liste des départements qui possèdent plus de 2 millions d’habitants
+SELECT d.departement_nom, v.ville_departement AS numeroDepartement, SUM(v.ville_population_2012) AS populationTT 
+FROM villes_france_free v, departement d 
+WHERE d.departement_code = v.ville_departement
+GROUP BY d.departement_nom, v.ville_departement
+HAVING populationTT > 2000000
+ORDER BY populationTT DESC
+-- résultat :
+-- Nord / 59 / 2565600
+-- Paris / 75 / 2211000
+--  ici il faut utiliser HAVING et non where/and car :
+-- La condition HAVING en SQL est presque similaire à WHERE à la seule différence que 
+-- HAVING permet de filtrer en utilisant des fonctions telles que SUM(), COUNT(), AVG(), MIN() ou MAX().
 
 -- 11  Remplacez les tirets par un espace vide, 
 -- pour toutes les villes commençant par “SAINT-” (dans la colonne qui contient les noms en majuscule)
+UPDATE `villes_france_free` 
+SET ville_nom = REPLACE(ville_nom, '-', ' ') 
+WHERE `ville_nom` LIKE 'SAINT%'
